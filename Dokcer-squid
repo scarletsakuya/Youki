@@ -1,1 +1,27 @@
+FROM library/alpine:latest
 
+ARG TZ="Asia/Shanghai"
+
+ENV TZ ${TZ}
+ENV HTTP_USER=sakuya \
+    PASSWORD=remilia \
+    SERVER_CRT=none \
+    SERVER_KEY=none
+
+RUN set -ex \
+    && apk --no-cache upgrade \
+    && apk add --no-cache --virtual .build-deps ca-certificates tzdata \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && apk add --no-cache squid nghttp2 apache2-utils \
+    && htpasswd -b -c /etc/squid/password ${HTTP_USER} ${PASSWORD} \
+    && apk del .build-deps \
+    && rm -rf /tmp/* /var/cache/apk/* /root/.cache/*
+    
+COPY nghttpx.conf /etc/nghttpx/nghttpx.conf
+COPY squid.conf /etc/squid/squid.conf
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+EXPOSE 2043/tcp
+
+ENTRYPOINT [ "bash", "/usr/local/bin/entrypoint.sh" ]
