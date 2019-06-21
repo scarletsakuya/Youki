@@ -24,4 +24,4 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 EXPOSE 2043/tcp
 
-ENTRYPOINT [ "bash", "/usr/local/bin/entrypoint.sh" ]
+ENTRYPOINT ["/init"]
